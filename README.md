@@ -6,6 +6,7 @@ This is a minimalistic lens library, based on data-lens.
 The main differences from data-lens are:
 
 * reduced API
+* minimal set of dependencies
 * data-lens, data-lens-fd and data-lens-template exported through a single
   module in a single package
 * `MonadState` combinators return `()`
