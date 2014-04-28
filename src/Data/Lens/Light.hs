@@ -1,6 +1,10 @@
 module Data.Lens.Light
-  ( module Data.Lens.Light.Core
+  (
+    -- * Lenses and basic operations
+    module Data.Lens.Light.Core
+    -- * Generate lenses using TH
   , module Data.Lens.Light.Template
+    -- * MonadState operators
   , module Data.Lens.Light.State
   )
   where
