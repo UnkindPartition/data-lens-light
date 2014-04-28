@@ -1,4 +1,4 @@
-module Data.Lens.Light
+module Data.Lens.Light.Core
   ( Lens(..)
   , lens
   , iso
