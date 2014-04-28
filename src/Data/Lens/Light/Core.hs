@@ -53,4 +53,5 @@ modL' l f a =
 
 -- | Infix version of 'getL' (with the reverse order of the arguments)
 infixl 9 ^.
+(^.) :: b -> Lens b c -> c
 (^.) = flip getL

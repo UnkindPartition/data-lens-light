@@ -129,6 +129,7 @@ decMakeLens t dec namer = do
           , ValD (VarP accName) (NormalB body) []
           ]
 
+errmsg :: Show a => a -> [Char]
 errmsg t = "Cannot derive accessors for name " ++ show t ++ " because"
          ++ "\n it is not a type declared with 'data' or 'newtype'"
          ++ "\n Did you remember to double-tick the type as in"
