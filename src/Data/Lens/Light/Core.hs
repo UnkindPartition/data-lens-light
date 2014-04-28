@@ -5,6 +5,7 @@ module Data.Lens.Light.Core
   , getL
   , setL
   , modL
+  , modL'
   , (^.)
   )
   where
@@ -43,6 +44,12 @@ modL :: Lens a b -> (b -> b) -> a -> a
 modL l f a =
   case runLens l a of
     (setx, x) -> setx (f x)
+
+-- | Get the modifier function from a lens. Forces function application.
+modL' :: Lens a b -> (b -> b) -> a -> a
+modL' l f a =
+  case runLens l a of
+    (setx, x) -> setx $! f x
 
 -- | Infix version of 'getL' (with the reverse order of the arguments)
 infixl 9 ^.
