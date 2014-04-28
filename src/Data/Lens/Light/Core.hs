@@ -12,6 +12,7 @@ module Data.Lens.Light.Core
 import Prelude hiding (id, (.))
 import Control.Category
 
+-- | Simple lens data type
 newtype Lens a b = Lens { runLens :: a -> (b -> a, b) }
 
 instance Category Lens where
