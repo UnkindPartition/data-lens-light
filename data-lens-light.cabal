@@ -4,7 +4,7 @@
 name:                data-lens-light
 version:             0.1
 synopsis:            Simple lenses, minimum dependencies
--- description:         
+description:         See <https://github.com/feuerbach/data-lens-light/blob/master/README.md>
 homepage:            https://github.com/feuerbach/data-lens-light
 license:             MIT
 license-file:        LICENSE
