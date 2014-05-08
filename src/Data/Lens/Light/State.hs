@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 module Data.Lens.Light.State
   ( access
   , (~=)
@@ -22,6 +23,12 @@ l ~= b = modify $ setL l b
 -- whole state.
 (!=) :: MonadState a m => Lens a b -> b -> m ()
 l != b = modify' $ setL l $! b
+
+#if !MIN_VERSION_mtl(2,2,0)
+-- Copied from mtl-2.2.0.1
+modify' :: MonadState s m => (s -> s) -> m ()
+modify' f = state (\s -> let s' = f s in s' `seq` ((), s'))
+#endif
 
 infixr 4 ~=, !=
 
