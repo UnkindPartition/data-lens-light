@@ -35,8 +35,3 @@ l %= f = modify $ modL l f
 l !%= f = modify' $ modL' l f
 
 infixr 4 %=, !%=
-
-modify' :: MonadState s m => (s -> s) -> m ()
-modify' f = do
-  s <- get
-  put $! f s
