@@ -1,14 +1,19 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP, MultiParamTypeClasses, FlexibleInstances #-}
 module Data.Lens.Light.State
   ( access
   , (~=)
   , (!=)
   , (%=)
   , (!%=)
+  , zoom
+  , MonadStateT
   )
   where
 
-import Control.Monad.State
+import Control.Monad.State.Class
+import qualified Control.Monad.State.Strict as Strict
+import qualified Control.Monad.State as Lazy
+import Control.Monad.Trans
 import Data.Lens.Light.Core
 
 -- | Get the value of a lens into state
@@ -42,3 +47,29 @@ l %= f = modify $ modL l f
 l !%= f = modify' $ modL' l f
 
 infixr 4 %=, !%=
+
+-- | The purpose of this class is to abstract the difference between the
+-- lazy and strict state monads, so that 'zoom' can work with either of
+-- them.
+class MonadStateT t where
+  runStateT :: t s m a -> s -> m (a, s)
+
+instance MonadStateT Strict.StateT where runStateT = Strict.runStateT
+instance MonadStateT Lazy.StateT where runStateT = Lazy.runStateT
+
+-- | Run a stateful computation with a smaller state inside another
+-- computation with a bigger state.
+zoom
+  :: ( MonadStateT stateT
+     , MonadState s (stateT s m)
+     , MonadTrans (stateT s)
+     , Monad m
+     )
+  => Lens s s'
+  -> stateT s' m a
+  -> stateT s m a
+zoom l a = do
+  s <- get
+  (r, s') <- lift $ runStateT a (s ^. l)
+  modify' $ setL l s'
+  return r
