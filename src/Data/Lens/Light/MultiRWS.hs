@@ -1,5 +1,5 @@
 {-# LANGUAGE RankNTypes, TypeOperators, ScopedTypeVariables,
-             ExistentialQuantification #-}
+             ExistentialQuantification, KindSignatures, CPP #-}
 module Data.Lens.Light.MultiRWS
   ( MultiHandler
   , stateHandler
@@ -91,3 +91,11 @@ safeUnion m1 m2 =
         then Left k
         else kont $ HM.insert k v m
     ) Right m1 $ m2
+
+#if !MIN_VERSION_base(4,7,0)
+data Proxy (a :: * -> *) = Proxy
+
+typeRep :: forall f . Typeable1 f => Proxy f -> TypeRep
+typeRep _ = typeOf1 (undefined :: f ())
+
+#endif
