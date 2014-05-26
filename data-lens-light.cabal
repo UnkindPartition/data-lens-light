@@ -52,4 +52,4 @@ Test-suite test
     , tasty >= 0.8
     , tasty-hunit >= 0.8
     , data-lens-light
-    , extensible-effects
+    , extensible-effects >= 1.7

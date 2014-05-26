@@ -59,11 +59,11 @@ runMultiRWS
   -> Eff rest (s, a)
 runMultiRWS (MultiHandler hs) s0 action = loop s0 (admin action)
   where
-    loop :: s -> VE a all -> Eff rest (s, a)
+    loop :: s -> VE all a -> Eff rest (s, a)
     loop s ve =
       case ve of
         Val x -> return (s, x)
-        E u@(Union (req :: t (VE a all))) ->
+        E u@(Union (req :: t (VE all a))) ->
           case
             HM.lookup
               (typeRep (Proxy :: Proxy t))
