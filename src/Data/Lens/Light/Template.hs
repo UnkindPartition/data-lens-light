@@ -10,7 +10,7 @@ module Data.Lens.Light.Template (
    ) where
 
 import Language.Haskell.TH.Syntax
-import Control.Monad (liftM, when, (<=<))
+import Control.Monad (liftM, when)
 import Data.Maybe (catMaybes)
 import Data.List (nub)
 import Data.Lens.Light.Core
@@ -47,7 +47,7 @@ import Data.Lens.Light.Core
 -- And will generate accessors when TypeName was declared
 -- using @data@ or @newtype@.
 makeLenses :: [Name] -> Q [Dec]
-makeLenses = return . concat <=< mapM makeLens
+makeLenses = liftM concat . mapM makeLens
 
 -- | 
 -- > makeLens a = makeLenses [a]
