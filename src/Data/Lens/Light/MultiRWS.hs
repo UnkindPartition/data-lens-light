@@ -3,15 +3,20 @@
 module Data.Lens.Light.MultiRWS
   ( MultiHandler
   , stateHandler
+  , readerHandler
+  , writerHandler
   , runMultiRWS
   ) where
 import Control.Category
 import Control.Eff
 import Control.Eff.State.Lazy
+import Control.Eff.Reader.Lazy
+import Control.Eff.Writer.Lazy
 import Control.Applicative
 import Data.Lens.Light.Core
 import Data.Typeable
 import Data.Maybe
+import Data.Monoid
 import qualified Data.HashMap.Strict as HM
 import Data.Hashable
 import Unsafe.Coerce
@@ -50,6 +55,36 @@ stateHandler l =
     HM.singleton
       (typeRep (Proxy :: Proxy (State a)))
       (UntypedHandler $ stateHandler' l)
+
+readerHandler' :: Lens s a -> Handler (Reader a) s
+readerHandler' l (Reader k) s =
+  let
+    ls  = getL l s
+  in (s, k ls)
+
+readerHandler
+  :: forall a s r . Typeable a
+  => Lens s a -> MultiHandler s (Reader a :> r) r
+readerHandler l =
+  MultiHandler $
+    HM.singleton
+      (typeRep (Proxy :: Proxy (Reader a)))
+      (UntypedHandler $ readerHandler' l)
+
+writerHandler' :: Monoid a => Lens s a -> Handler (Writer a) s
+writerHandler' l (Writer w v) s =
+  let
+    s' = modL l (`mappend` w) s
+  in (s', v)
+
+writerHandler
+  :: forall a s r . (Typeable a, Monoid a)
+  => Lens s a -> MultiHandler s (Writer a :> r) r
+writerHandler l =
+  MultiHandler $
+    HM.singleton
+      (typeRep (Proxy :: Proxy (Writer a)))
+      (UntypedHandler $ writerHandler' l)
 
 runMultiRWS
   :: forall s all rest a
