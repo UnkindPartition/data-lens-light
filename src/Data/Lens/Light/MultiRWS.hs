@@ -1,5 +1,6 @@
 {-# LANGUAGE RankNTypes, TypeOperators, ScopedTypeVariables,
-             ExistentialQuantification, KindSignatures, CPP #-}
+             ExistentialQuantification, KindSignatures, CPP,
+             FlexibleContexts #-}
 module Data.Lens.Light.MultiRWS
   ( MultiHandler
   , stateHandler
@@ -7,12 +8,14 @@ module Data.Lens.Light.MultiRWS
   , writerHandler
   , runMultiRWS
   ) where
+import Prelude hiding ((.), id)
 import Control.Category
 import Control.Eff
-import Control.Eff.State.Lazy
-import Control.Eff.Reader.Lazy
-import Control.Eff.Writer.Lazy
+import Control.Eff.State
+import Control.Eff.Reader
+import Control.Eff.Writer
 import Control.Applicative
+import Control.Monad
 import Data.Lens.Light.Core
 import Data.Typeable
 import Data.Maybe
@@ -21,7 +24,7 @@ import qualified Data.HashMap.Strict as HM
 import Data.Hashable
 import Unsafe.Coerce
 
-type Handler req s = forall a . req a -> s -> (s, a)
+type Handler req s = forall a . req a -> State s a
 
 data UntypedHandler s = forall req . UntypedHandler (Handler req s)
 
@@ -40,12 +43,13 @@ instance Category (MultiHandler s) where
       Right u -> u
 
 stateHandler' :: Lens s a -> Handler (State a) s
-stateHandler' l (State t k) s =
+stateHandler' l (State f) =
   let
-    ls  = getL l s
-    ls' = t ls
-    s'  = setL l ls' s
-  in (s', k ls')
+    f' s =
+      case f (s ^. l) of
+        (s', r) -> (setL l s' s, r)
+  in
+    State f'
 
 stateHandler
   :: forall a s r . Typeable a
@@ -57,10 +61,7 @@ stateHandler l =
       (UntypedHandler $ stateHandler' l)
 
 readerHandler' :: Lens s a -> Handler (Reader a) s
-readerHandler' l (Reader k) s =
-  let
-    ls  = getL l s
-  in (s, k ls)
+readerHandler' l (Reader k) = State (\s -> (s, k $ getL l s))
 
 readerHandler
   :: forall a s r . Typeable a
@@ -72,10 +73,8 @@ readerHandler l =
       (UntypedHandler $ readerHandler' l)
 
 writerHandler' :: Monoid a => Lens s a -> Handler (Writer a) s
-writerHandler' l (Writer w v) s =
-  let
-    s' = modL l (`mappend` w) s
-  in (s', v)
+writerHandler' l (Writer w v) =
+  State (\s -> (modL l (`mappend` w) s, v))
 
 writerHandler
   :: forall a s r . (Typeable a, Monoid a)
@@ -87,25 +86,22 @@ writerHandler l =
       (UntypedHandler $ writerHandler' l)
 
 runMultiRWS
-  :: forall s all rest a
-  .  MultiHandler s all rest
-  -> s
+  :: forall s all rest a . (Typeable s, Member (State s) rest)
+  => MultiHandler s all rest
   -> Eff all a
-  -> Eff rest (s, a)
-runMultiRWS (MultiHandler hs) s0 action = loop s0 (admin action)
-  where
-    loop :: s -> VE all a -> Eff rest (s, a)
-    loop s ve =
-      case ve of
-        Val x -> return (s, x)
-        E u@(Union (req :: t (VE all a))) ->
-          case
-            HM.lookup
-              (typeRep (Proxy :: Proxy t))
-              hs
-          of
-            Just uh -> uncurry loop $ retypeHandler uh req s
-            Nothing -> send (<$> unsafeReUnion u) >>= loop s
+  -> Eff rest a
+runMultiRWS (MultiHandler hs) action =
+  runEff action
+    (\x -> return x)
+    (\u@(Union (req :: t (Eff rest a))) -> join $
+      case
+        HM.lookup
+          (typeRep (Proxy :: Proxy t))
+          hs
+      of
+        Just uh -> case retypeHandler uh req of State f -> state f
+        Nothing -> sendU (<$> unsafeReUnion u)
+    )
 
 -- | Union that returns an error when duplicate entries are found.
 --
