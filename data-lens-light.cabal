@@ -2,7 +2,10 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                data-lens-light
-version:             0.2 -- this is a temporary version bump for the multirws branch; not released
+
+-- this is a temporary version bump for the multirws branch; not released
+version:             0.2
+
 synopsis:            Simple lenses, minimum dependencies
 description:         See <https://github.com/feuerbach/data-lens-light/blob/master/README.md>
 homepage:            https://github.com/feuerbach/data-lens-light
