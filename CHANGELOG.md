@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.1.2
+-------------
+
+Add `vanLaarhoven`
+
 Version 0.1.1
 -------------
 
