@@ -7,6 +7,7 @@ module Data.Lens.Light.Core
   , modL
   , modL'
   , (^.)
+  , vanLaarhoven
   )
   where
 
@@ -55,3 +56,11 @@ modL' l f a =
 infixl 9 ^.
 (^.) :: b -> Lens b c -> c
 (^.) = flip getL
+
+-- | Convert a lens to its van Laarhoven representation
+vanLaarhoven :: Functor f => Lens a b -> (b -> f b) -> (a -> f a)
+vanLaarhoven l f a =
+  let
+    fb = f (a ^. l)
+    fa = fmap (\b -> setL l b a) fb
+  in fa
