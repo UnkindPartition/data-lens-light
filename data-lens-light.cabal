@@ -11,7 +11,7 @@ license-file:        LICENSE
 author:              Roman Cheplyaka
 maintainer:          roma@ro-che.info
 -- copyright:           
-category:            Data
+category:            Data, Lenses
 build-type:          Simple
 extra-source-files:
   README.md
