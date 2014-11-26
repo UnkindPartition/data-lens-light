@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.1.2.1
+---------------
+
+Relax the lower bound on `base`
+
 Version 0.1.2
 -------------
 
