@@ -28,7 +28,7 @@ library
     Data.Lens.Light.State
   -- other-extensions:    
   build-depends:
-    base >= 4.5 && < 5,
+    base == 4.*,
     template-haskell,
     mtl >= 2.1
   hs-source-dirs:      src
