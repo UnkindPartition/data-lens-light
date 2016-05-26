@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, CPP #-}
 
 {- |
 This module provides an automatic Template Haskell
@@ -84,8 +84,14 @@ nameMakeLens t namer = do
 decMakeLens :: Name -> Dec -> (String -> Maybe String) -> Q [Dec]
 decMakeLens t dec namer = do
     (params, cons) <- case dec of
+#if MIN_VERSION_template_haskell(2,11,0)
+                 -- https://github.com/feuerbach/data-lens-light/issues/7
+                 DataD _ _ params _ cons' _ -> return (params, cons')
+                 NewtypeD _ _ params _ con' _ -> return (params, [con'])
+#else
                  DataD _ _ params cons' _ -> return (params, cons')
                  NewtypeD _ _ params con' _ -> return (params, [con'])
+#endif
                  _ -> fail $ errmsg t
     decs <- makeAccs params . nub $ concatMap namedFields cons
     when (null decs) $ qReport False nodefmsg
