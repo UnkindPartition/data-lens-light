@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.1.2.2
+---------------
+
+Fix build with ghc 8
+
 Version 0.1.2.1
 ---------------
 
