@@ -60,13 +60,13 @@ infixl 8 ^.
 infixl 9 >.
 (>.) :: Lens a b -> Lens b c -> Lens a c
 f >. g = Lens $ \ x ->
-    let
-      (ym, y) = runLens f x
-      (zm, z) = runLens g y
-    in
-      ( ym . zm
-      , z
-      )
+  let
+    (ym, y) = runLens f x
+    (zm, z) = runLens g y
+  in
+    ( ym . zm
+    , z
+    )
 
 -- | Convert a lens to its van Laarhoven representation
 vanLaarhoven :: Functor f => Lens a b -> (b -> f b) -> (a -> f a)
