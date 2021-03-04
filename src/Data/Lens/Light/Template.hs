@@ -81,6 +81,12 @@ nameMakeLens t namer = do
                     _ -> fail $ errmsg t
     decMakeLens t reified namer
 
+#if MIN_VERSION_template_haskell(2,17,0)
+type TyVarBndr' = TyVarBndr ()
+#else
+type TyVarBndr' = TyVarBndr
+#endif
+
 decMakeLens :: Name -> Dec -> (String -> Maybe String) -> Q [Dec]
 decMakeLens t dec namer = do
     (params, cons) <- case dec of
@@ -104,7 +110,7 @@ decMakeLens t dec namer = do
           ++ "\n nameMakeLens, remember accessors are"
           ++ "\n only generated for fields starting with an underscore"
 
-    makeAccs :: [TyVarBndr] -> [VarStrictType] -> Q [Dec]
+    makeAccs :: [TyVarBndr'] -> [VarStrictType] -> Q [Dec]
     makeAccs params vars =
         liftM (concat . catMaybes) $ mapM (\ (name,_,ftype) -> makeAccFromName name params ftype) vars
 
@@ -113,15 +119,19 @@ decMakeLens t dec namer = do
         n <- namer (occString occ)
         return $ Name (mkOccName n) NameS
 
-    makeAccFromName :: Name -> [TyVarBndr] -> Type -> Q (Maybe [Dec])
+    makeAccFromName :: Name -> [TyVarBndr'] -> Type -> Q (Maybe [Dec])
     makeAccFromName name params ftype =
         case transformName name of
             Nothing -> return Nothing
             Just n -> liftM Just $ makeAcc name params ftype n
 
-    makeAcc ::Name -> [TyVarBndr] -> Type -> Name -> Q [Dec]
+    makeAcc :: Name -> [TyVarBndr'] -> Type -> Name -> Q [Dec]
     makeAcc name params ftype accName = do
+#if MIN_VERSION_template_haskell(2,17,0)
+        let params' = map (\x -> case x of (PlainTV n _) -> n; (KindedTV n _ _) -> n) params
+#else
         let params' = map (\x -> case x of (PlainTV n) -> n; (KindedTV n _) -> n) params
+#endif
         let appliedT = foldl AppT (ConT t) (map VarT params')
         body <- [|
                  lens
@@ -130,8 +140,16 @@ decMakeLens t dec namer = do
                         $( return $ RecUpdE (VarE 's) [(name, VarE 'x)] ) )
                 |]
         return
-          [ SigD accName (ForallT (map PlainTV params')
-               [] (AppT (AppT (ConT ''Lens) appliedT) ftype))
+          [ SigD accName (ForallT
+              (map
+#if MIN_VERSION_template_haskell(2,17,0)
+                (flip PlainTV SpecifiedSpec)
+#else
+                PlainTV
+#endif
+                params')
+              []
+              (AppT (AppT (ConT ''Lens) appliedT) ftype))
           , ValD (VarP accName) (NormalB body) []
           ]
 
