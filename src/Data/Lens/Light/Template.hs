@@ -27,7 +27,7 @@ import Data.Lens.Light.Core
 --
 -- For example, given the data type:
 --
--- > data Score = Score { 
+-- > data Score = Score {
 -- >   _p1Score :: Int
 -- > , _p2Score :: Int
 -- > , rounds :: Int
@@ -49,7 +49,7 @@ import Data.Lens.Light.Core
 makeLenses :: [Name] -> Q [Dec]
 makeLenses = return . concat <=< mapM makeLens
 
--- | 
+-- |
 -- > makeLens a = makeLenses [a]
 --
 -- > $( makeLens ''TypeName )
@@ -59,7 +59,7 @@ makeLens n = nameMakeLens n stripUnderscore
 
 stripUnderscore :: String -> Maybe String
 stripUnderscore [] = Nothing
-stripUnderscore s 
+stripUnderscore s
    | head s == '_' = Just (tail s)
    | otherwise = Nothing
 
@@ -158,5 +158,3 @@ errmsg t = "Cannot derive accessors for name " ++ show t ++ " because"
          ++ "\n it is not a type declared with 'data' or 'newtype'"
          ++ "\n Did you remember to double-tick the type as in"
          ++ "\n $(makeLenses ''TheType)?"
-
-
