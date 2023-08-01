@@ -1,11 +1,15 @@
 Changes
 =======
 
+Version 0.1.2.4
+---------------
+
+Fix build with template-haskell-2.21 (GHC 9.8)
+
 Version 0.1.2.3
 ---------------
 
 Fix build with ghc 9
-
 
 Version 0.1.2.2
 ---------------
