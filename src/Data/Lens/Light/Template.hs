@@ -58,10 +58,8 @@ makeLens :: Name -> Q [Dec]
 makeLens n = nameMakeLens n stripUnderscore
 
 stripUnderscore :: String -> Maybe String
-stripUnderscore [] = Nothing
-stripUnderscore s
-   | head s == '_' = Just (tail s)
-   | otherwise = Nothing
+stripUnderscore ('_':t) = Just t
+stripUnderscore _ = Nothing
 
 namedFields :: Con -> [VarStrictType]
 namedFields (RecC _ fs) = fs
