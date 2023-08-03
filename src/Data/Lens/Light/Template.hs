@@ -27,7 +27,7 @@ import Data.Lens.Light.Core
 --
 -- For example, given the data type:
 --
--- > data Score = Score { 
+-- > data Score = Score {
 -- >   _p1Score :: Int
 -- > , _p2Score :: Int
 -- > , rounds :: Int
@@ -49,7 +49,7 @@ import Data.Lens.Light.Core
 makeLenses :: [Name] -> Q [Dec]
 makeLenses = return . concat <=< mapM makeLens
 
--- | 
+-- |
 -- > makeLens a = makeLenses [a]
 --
 -- > $( makeLens ''TypeName )
@@ -58,10 +58,8 @@ makeLens :: Name -> Q [Dec]
 makeLens n = nameMakeLens n stripUnderscore
 
 stripUnderscore :: String -> Maybe String
-stripUnderscore [] = Nothing
-stripUnderscore s 
-   | head s == '_' = Just (tail s)
-   | otherwise = Nothing
+stripUnderscore ('_':t) = Just t
+stripUnderscore _ = Nothing
 
 namedFields :: Con -> [VarStrictType]
 namedFields (RecC _ fs) = fs
@@ -81,7 +79,9 @@ nameMakeLens t namer = do
                     _ -> fail $ errmsg t
     decMakeLens t reified namer
 
-#if MIN_VERSION_template_haskell(2,17,0)
+#if MIN_VERSION_template_haskell(2,21,0)
+type TyVarBndr' = TyVarBndr BndrVis
+#elif MIN_VERSION_template_haskell(2,17,0)
 type TyVarBndr' = TyVarBndr ()
 #else
 type TyVarBndr' = TyVarBndr
@@ -158,5 +158,3 @@ errmsg t = "Cannot derive accessors for name " ++ show t ++ " because"
          ++ "\n it is not a type declared with 'data' or 'newtype'"
          ++ "\n Did you remember to double-tick the type as in"
          ++ "\n $(makeLenses ''TheType)?"
-
-
