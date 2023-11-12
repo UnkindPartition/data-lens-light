@@ -1,5 +1,8 @@
-data-lens-light
-===============
+# data-lens-light
+
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/UnkindPartition/data-lens-light/ci.yaml?branch=master)](https://github.com/UnkindPartition/data-lens-light/actions/workflows/ci.yaml)
+[![Hackage version](https://img.shields.io/hackage/v/data-lens-light.svg?color=success)](https://hackage.haskell.org/package/data-lens-light)
+[![Dependencies](https://img.shields.io/hackage-deps/v/data-lens-light?label=Dependencies)](https://packdeps.haskellers.com/feed?needle=data-lens-light)
 
 This is a minimalistic lens library, based on data-lens.
 
